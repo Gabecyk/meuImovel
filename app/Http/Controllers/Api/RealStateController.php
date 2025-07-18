@@ -40,6 +40,5 @@ class RealStateController extends Controller
                 'error' => $ex->getMessage()
             ]);
         }
-
     }
 }
