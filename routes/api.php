@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\RealStateController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,5 +41,8 @@ Route::prefix('/v1')->group(function() {
         // Route::resource('real-states', RealStateController::class)->except([
         //     'create', 'edit' // Exclui as rotas de formulário que não são comuns em APIs
         // ]);
+    });
+    Route::name('users.')->group(function() {
+        Route::resource('users', UserController::class);
     });
 });
