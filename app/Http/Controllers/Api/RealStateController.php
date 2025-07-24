@@ -40,7 +40,7 @@ class RealStateController extends Controller
     public function store(RealStateRequest $request)
     {
         $data = $request->all();
-
+        dd($request->file('images'));
         try {
 
             $realState = $this->realState->create($data); // Mass Asignment
