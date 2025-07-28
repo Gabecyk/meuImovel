@@ -26,7 +26,7 @@ class RealStateController extends Controller
     public function show($id)
     {
         try {
-            $realState = $this->realState->findOrFail($id);
+            $realState = $this->realState->with('photos')->with('category_id')->findOrFail($id);
 
 
             return response()->json($realState);
@@ -40,13 +40,24 @@ class RealStateController extends Controller
     public function store(RealStateRequest $request)
     {
         $data = $request->all();
-        dd($request->file('images'));
+        $images = $request->file('images');
+
         try {
 
             $realState = $this->realState->create($data); // Mass Asignment
 
             if(isset($data['categories']) && count($data['categories'])) {
                 $realState->categories()->sync($data['categories']);
+            }
+
+            if($images){
+                $imagesUploded = [];
+
+                foreach($images as $image){
+                    $path = $image->store('images', 'public');
+                    $imagesUploded[] = ['photo' => $path, 'is_thumb' => false];
+                }
+                $realState->photos()->createMany($imagesUploded);
             }
 
             return response()->json([
@@ -60,9 +71,10 @@ class RealStateController extends Controller
         }
     }
 
-    public function update(RealStateRequest $request, $id)
+    public function update(RealStateRequest $request, $id) // cuidado ao fazer put no postman, tem enviar como post e adicionar campo '_method' e valor 'put'
     {
         $data = $request->all();
+        $images = $request->file('images');
 
         try {
             $realState = $this->realState->findOrFail($id);
@@ -77,6 +89,16 @@ class RealStateController extends Controller
 
             if(isset($data['categories']) && count($data['categories'])) {
                 $realState->categories()->sync($data['categories']);
+            }
+
+            if($images){
+                $imagesUploded = [];
+
+                foreach($images as $image){
+                    $path = $image->store('images', 'public');
+                    $imagesUploded[] = ['photo' => $path, 'is_thumb' => false];
+                }
+                $realState->photos()->createMany($imagesUploded);
             }
 
             return response()->json([
