@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Auth\LoginJwtController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\RealStateController;
 use App\Http\Controllers\Api\RealStatePhotoController;
@@ -23,37 +24,43 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('/v1')->group(function() {
-    Route::name('real_state.')->group(function() { // Aplicamos o prefixo de nome aqui
 
-        // Isso vai gerar 7 rotas para RealStateController:
-        // GET    /v1/real-states       -> real_state.index    -> RealStateController@index
-        // POST   /v1/real-states       -> real_state.store    -> RealStateController@store
-        // GET    /v1/real-states/{real_state} -> real_state.show     -> RealStateController@show
-        // PUT/PATCH /v1/real-states/{real_state} -> real_state.update   -> RealStateController@update
-        // DELETE /v1/real-states/{real_state} -> real_state.destroy  -> RealStateController@destroy
-        // GET    /v1/real-states/create -> real_state.create   -> RealStateController@create (geralmente não usada em APIs)
-        // GET    /v1/real-states/{real_state}/edit -> real_state.edit     -> RealStateController@edit (geralmente não usada em APIs)
+    Route::post('/login', [LoginJwtController::class, 'login'])->name('login');
 
-        // Se você quer apenas as rotas que já tinha (index, store, update), use 'only':
-        Route::resource('real-states', RealStateController::class)/*->only([
-            'index', 'store', 'update'
-        ])*/;
-
-        // Se você quiser excluir rotas específicas, use 'except':
-        // Route::resource('real-states', RealStateController::class)->except([
-        //     'create', 'edit' // Exclui as rotas de formulário que não são comuns em APIs
-        // ]);
-        
+    Route::group(['middleware' => ['auth:api']], function() {
+        Route::name('real_state.')->group(function() { // Aplicamos o prefixo de nome aqui
+    
+            // Isso vai gerar 7 rotas para RealStateController:
+            // GET    /v1/real-states       -> real_state.index    -> RealStateController@index
+            // POST   /v1/real-states       -> real_state.store    -> RealStateController@store
+            // GET    /v1/real-states/{real_state} -> real_state.show     -> RealStateController@show
+            // PUT/PATCH /v1/real-states/{real_state} -> real_state.update   -> RealStateController@update
+            // DELETE /v1/real-states/{real_state} -> real_state.destroy  -> RealStateController@destroy
+            // GET    /v1/real-states/create -> real_state.create   -> RealStateController@create (geralmente não usada em APIs)
+            // GET    /v1/real-states/{real_state}/edit -> real_state.edit     -> RealStateController@edit (geralmente não usada em APIs)
+    
+            // Se você quer apenas as rotas que já tinha (index, store, update), use 'only':
+            Route::resource('real-states', RealStateController::class)/*->only([
+                'index', 'store', 'update'
+            ])*/;
+    
+            // Se você quiser excluir rotas específicas, use 'except':
+            // Route::resource('real-states', RealStateController::class)->except([
+            //     'create', 'edit' // Exclui as rotas de formulário que não são comuns em APIs
+            // ]);
+            
+        });
+        Route::name('users.')->group(function() {
+            Route::resource('users', UserController::class);
+        });
+        Route::name('categories.')->group(function() {
+            Route::get('categories/{id}/real-states', [CategoryController::class, 'realStates']);
+            Route::resource('categories', CategoryController::class);
+        });
+        Route::name('photos.')->prefix('photos')->group(function() {
+            Route::delete('/{id}', [RealStatePhotoController::class, 'remove'])->name('delete');
+            Route::put('/set-thumb/{photoId}/{realStateId}', [RealStatePhotoController::class, 'setThumb']);
+        });
     });
-    Route::name('users.')->group(function() {
-        Route::resource('users', UserController::class);
-    });
-    Route::name('categories.')->group(function() {
-        Route::get('categories/{id}/real-states', [CategoryController::class, 'realStates']);
-        Route::resource('categories', CategoryController::class);
-    });
-    Route::name('photos.')->prefix('photos')->group(function() {
-        Route::delete('/{id}', [RealStatePhotoController::class, 'remove'])->name('delete');
-        Route::put('/set-thumb/{photoId}/{realStateId}', [RealStatePhotoController::class, 'setThumb']);
-    });
+    
 });
