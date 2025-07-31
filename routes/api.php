@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Auth\LoginJwtController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\RealStateController;
 use App\Http\Controllers\Api\RealStatePhotoController;
+use App\Http\Controllers\Api\RealStateSearchController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('/v1')->group(function() {
 
     Route::post('/login', [LoginJwtController::class, 'login'])->name('login');
+    Route::get('/logout', [LoginJwtController::class, 'logout'])->name('logout');
+    Route::get('/refresh', [LoginJwtController::class, 'refresh'])->name('refresh');
+
+    Route::get('/search', [RealStateSearchController::class, 'index'])->name('search');
 
     Route::group(['middleware' => ['auth:api']], function() {
         Route::name('real_state.')->group(function() { // Aplicamos o prefixo de nome aqui
